@@ -1,0 +1,64 @@
+\usepackage{cite}
+\usepackage[pdftex]{graphicx}
+\usepackage[cmex10]{amsmath}
+\usepackage[tight,footnotesize]{subfigure}
+\usepackage{fixltx2e}
+\usepackage{url}
+\usepackage{multirow}
+\usepackage{latexsym}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{wasysym}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{threeparttable}
+\usepackage{acronym}
+\usepackage{rotating}
+\usepackage{rotate}
+\usepackage{eurosym}
+\usepackage[utf8]{inputenc}
+\usepackage{color}
+\usepackage{booktabs}
+\usepackage{allrunes}
+\usepackage{tabularx}
+\usepackage{supertabular}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyvrb,relsize}
+\usepackage{caption}
+\usepackage{framed}
+\usepackage{blindtext}
+\usepackage{float}
+\usepackage{algpseudocode}
+\usepackage{cprotect}
+% always on last place
+\usepackage{hyperref}
+
+% hyperref options
+\hypersetup{
+    colorlinks,%
+    citecolor=black,%
+    filecolor=black,%
+    linkcolor=black,%
+    urlcolor=blue % yep, urls are blue and always will be...
+}
+
+% special environment for highlights, special concepts, etc.
+
+% hyphenation style
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+% new command for short vertical space
+\newcommand{\vertbreak}{\vspace{1.75 mm}}
+
+% set caption font size to footnote size
+\captionsetup{font={footnotesize}}
+
+\makeatletter
+\let\OldStatex\Statex
+\renewcommand{\Statex}[1][3]{%
+  \setlength\@tempdima{\algorithmicindent}%
+  \OldStatex\hskip\dimexpr#1\@tempdima\relax}
+\makeatother
+
