@@ -1,10 +1,10 @@
 \section{Introduction}
 \label{sec:intro}
 
-The Vehicle Routing Problem (VRP) is an important part in the areas of 
+The Vehicle Routing Problem (VRP) plays an important part in the areas of 
 Operations Research related with physical distribution and logistics. The VRP is 
 associated with real-world applications concerned with the distribution of 
-supplies between depots and demand points, using vehicles as transport for 
+supplies between depots and demand points or stations, using vehicles as transport for 
 those same supplies. Among the variations of the VRP is 
 the Capacitated VRP (CVRP), which will be the object of study for the remainder 
 of this paper.
@@ -12,15 +12,16 @@ of this paper.
 \subsection{Definition}
 \label{subsec:definition}
 
-Consider $N$ demand points in a given region, each requesting a 
-quantity\slash demand $D_i$, with $i = 1, 2, ..., N$ of supplies to be 
+Consider $N$ demand points or stations $S_i$, with $i = 1, 2, ..., N$, in a 
+given region, each requesting a 
+quantity\slash demand $\sigma_i$ of supplies to be 
 delivered to it. The supplies are kept at a depot $D$, which also stations a 
 fleet of transporting vehicles. Vehicles have equal maximum carrying capacities 
 $C$. Each vehicle must start and finish its route at the depot $D$. The 
 problem is to get a group of delivery routes from the depot $D$ to the $N$ 
-demand points, so that the total distance covered by the whole fleet of 
-vehicles is minimized. One assumes the demands $D_i$ are less than the maximum 
-capacity of each vehicle, and the whole quantity $D_i$ at a demand point $i$ 
+stations, so that the total distance covered by the whole fleet of 
+vehicles is minimized. One assumes the demands $\sigma_i$ are less than the maximum 
+capacity of each vehicle, and the whole quantity $\sigma_i$ at a station $i$ 
 must be satisfied by a single vehicle.\vertbreak
 
 Notice that the VRP reduces to a Traveling Salesman Problem (TSP) when the 
@@ -32,21 +33,22 @@ of the VRP.
 \subsection{Constructive Heuristics for the CVRP}
 \label{subsec:constructive}
 
-One of the most widely known approaches to the CVRP problem is the Clarke Wright 
-Savings (CWS) algorithm, as presented in Section 5.2.1 of~\cite{Toth2002}. The 
+The Clarke Wright 
+Savings (CWS) algorithm, as presented in Section 5.2.1 of~\cite{Toth2002}, 
+is a widely known approach to tackle CVRP. The 
 key idea behind the CWS algorithm is the concept of `savings'. In order to 
-better understand the concept of `savings' --- and keeping the definition of the 
-CVRP in mind --- let there be a depot $D$ and $N$ demand points. Now consider an 
+better understand this concept --- and keeping the definition of the 
+CVRP in mind --- let us consider a depot $D$ and $N$ stations $S_i$, with $i = 1, 2, ..., N$. Now consider an 
 initial solution to the CVRP consisting of $N$ routes (serviced by $N$ vehicles), 
-dispatching one vehicle to each one of the $N$ demand points. For each one of 
-the routes to a demand point $i$, with $i = 1, 2, ..., N$, the length is 
+dispatching one vehicle to each one of the $N$ stations. For each one of 
+the routes to a station $i$, with $i = 1, 2, ..., N$, the length is 
 $2 \times d(D,i)$, i.e $d(D,i) + d(i,D)$. For all the routes, the overall cost (i.e. 
-length is $2\sum_{i=1}^{N} d(D,i)$.\vertbreak
+length) becomes $2\sum_{i=1}^{N} d(D,i)$.\vertbreak
 
 If one now dispatches a single vehicle to satisfy two points $i$ and $j$, on a 
 single route, the total distance traveled is reduced by the amount $s_{ij}$, i.e. 
-the `saving' one gets by servicing two demand points at once vs. servicing only 
-one demand point:
+the `saving' one gets by servicing two stations at once vs. servicing only 
+one station:
 
 \begin{equation*}
 \begin{split}
@@ -55,7 +57,7 @@ s_{ij}  &= 2d(D,i) + 2d(D,j) - (d(D,i) + d(i,j) + d(j,D))\\
 \end{split}
 \end{equation*}\vertbreak
 
-The larger the `saving', the better to combine the link $(i,j)$ in a single 
+The larger the `saving', the better it is to combine the link $(i,j)$ in a single 
 CVRP route. The Clarke and Wright Savings algorithm follows this concept. The 
 algorithm is composed by the following steps, as described in~\cite{Toth2002}, 
 section 5.2.1:
@@ -63,7 +65,7 @@ section 5.2.1:
 \begin{itemize}
 
     \item \textbf{STEP 1:} Compute the savings $s_{ij}$ for each combination of 
-            demand points $i, j = 1, ..., N \wedge i \neq j$. Create $N$ vehicle 
+            stations $i, j = 1, ..., N \wedge i \neq j$. Create $N$ vehicle 
             routes $(0,i,0)$ for $i = 1, ..., N$. Order the savings $s_{ij}$ in 
             a descending order of magnitude.
     \item \textbf{STEP 2 (Parallel Version):} Start from the top of the 

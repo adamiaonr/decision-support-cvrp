@@ -225,42 +225,42 @@ version, as verified in the results given in Section~\ref{sec:results}.
 
 Given the results of the constructive heuristic obtained after a run of the CWS 
 algorithm, we run a 2-opt local search heuristic over the results of each route 
-$r_n$. This procedure is based on that described in~\cite{Psaraftis1983391, 
+$R_i$. This procedure is based on that described in~\cite{Psaraftis1983391, 
 Thangiahl1996}. Its objective is to remove crossings of links in a route, while 
 preserving the orientation of the routes, which reduces the distance of the 
 route (see Section 6.2 in~\cite{Michalewicz2004}).\vertbreak
 
-In this case, we try to find a better solution $r'_n$, i.e. one for which the 
-evaluation function $e(r'_n) < e(r_n)$, within the neighborhood of $r_n$, i.e. 
-the routes one can reach by swapping two nodes in $r_n$.\vertbreak
+In this case, we try to find a better solution $R'_i$, i.e. one for which the 
+evaluation function $d(R'_i) < d(R_i)$, within the neighborhood of $R_i$, i.e. 
+the routes one can reach by swapping two nodes in $R_i$.\vertbreak
 
 The 2-opt local search routine was implemented according to the specification 
 given below, which shows an exchange between all combination of nodes at 
-positions $i$ and $j$, within all routes calculated by the CWS algorithm, 
-$r_n$ (let $r[i]$ and $r[j]$ represent the \verb+Station+ instances at indexes 
-$i$ and $j$ within a \verb+Route+ $r$, and $d(r[i], r[j])$ represent the 
-euclidean distance between stations $r[i]$ and $r[j]$):\vertbreak
+positions $k$ and $m$, within all routes calculated by the CWS algorithm, 
+$R$ (let $R[k]$ and $R[m]$ represent the \verb+Station+ instances at indexes 
+$k$ and $m$ within a \verb+Route+ $R$, and $d(R[k], R[m])$ represent the 
+euclidean distance between stations $R[k]$ and $R[m]$):\vertbreak
 
 \begin{algorithmic}[1]
-\ForAll{final CWS routes $r_n$} 
+\ForAll{final CWS routes $R$} 
 
-    \State best\_distance $ \leftarrow e(r_n)$ 
+    \State best\_distance $ \leftarrow d(R_i)$ 
 
-    \For{ ($i \leftarrow 1$; $i <$ size($r_n$) $- 1$; $i$++)} 
+    \For{ ($k \leftarrow 1$; $k <$ size($R_i$) $- 1$; $k$++)} 
 
-        \For{ ($j \leftarrow (i + 1)$; $j <$ size($r_n$); $j$++)} 
+        \For{ ($m \leftarrow (m + 1)$; $m <$ size($R_i$); $m$++)} 
 
             \State new\_distance $ \leftarrow $
-            \Statex[4] $e(r_n)$ 
-            \Statex[4] + $d(r_n[i - 1], r_n[j])$ 
-            \Statex[4] + $d(r_n[i], r_n[j + 1])$ 
-            \Statex[4] - $d(r_n[i - 1], r_n[i])$ 
-            \Statex[4] - $d(r_n[j], r_n[j + 1])$
+            \Statex[4] $d(R_i)$ 
+            \Statex[4] + $d(R_i[k - 1], R_i[m])$ 
+            \Statex[4] + $d(R_i[k], R_i[m + 1])$ 
+            \Statex[4] - $d(R_i[k - 1], R_i[k])$ 
+            \Statex[4] - $d(R_i[m], R_i[m + 1])$
 
             \If {new\_distance $ < $ best\_distance}
 
                 \State best\_distance $ \leftarrow $ new\_distance
-                \State swap($r_n[i],r_n[j]$)
+                \State swap($R_i[k],R_i[m]$)
             \EndIf
 
         \EndFor
@@ -271,12 +271,33 @@ euclidean distance between stations $r[i]$ and $r[j]$):\vertbreak
 \end{algorithmic}\vertbreak
 
 After an initial evaluation of the potential gains of an exchange between 
-nodes $i$ and $j$, if a lower cost $e(r'_n) < e(r_n)$ is detected, the 
+nodes $k$ and $m$, if a lower cost $d(R'_i) < d(R_i)$ is detected, the 
 actual \verb?swap()? procedure is applied. Given a route arrangement, such as 
-\[ depot \rightarrow r[i] \rightarrow r[a] \rightarrow r[b] \rightarrow r[j] \rightarrow depot \] 
+the one shown in Figure~\ref{fig:2-opt-before}, the \verb?swap(W,Y)? procedure 
+changes it into Figure~\ref{fig:2-opt-after}.
 
-the \verb?swap(i,j)? procedure changes it into 
-\[ depot \rightarrow r[j] \rightarrow r[b] \rightarrow r[a] \rightarrow r[i] \rightarrow depot \] 
+%\[ depot \rightarrow r[i] \rightarrow r[a] \rightarrow r[b] \rightarrow r[j] \rightarrow depot \] 
+%\[ depot \rightarrow r[j] \rightarrow r[b] \rightarrow r[a] \rightarrow r[i] \rightarrow depot \] 
+
+\begin{figure}[h!]
+    \centering
+
+    \subfigure[]{
+        \includegraphics[width=0.25\textwidth] {figures/2-opt-before.png}
+        \label{fig:2-opt-before}
+    }
+
+    \subfigure[]{
+        \includegraphics[width=0.25\textwidth] {figures/2-opt-after.png}
+        \label{fig:2-opt-after}
+    }
+
+    \cprotect\caption{Graphical depiction of the \verb?swap()? procedure, 
+        in this case between nodes $W$ and $Y$ of a given route composed by 
+        four nodes ($D$ represents a depot).}
+    \label{fig:2-opt}
+
+\end{figure}
 
 \subsection{Simulated Annealing (SA)}
 \label{subsec:sa}
