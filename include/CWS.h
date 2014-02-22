@@ -87,7 +87,8 @@ class CWS
 
         static void Run(
                 CVRP * graph,
-                CWS::Version version);
+                CWS::Version version,
+                bool matlab);
 };
 
 #endif  // CWS_H_

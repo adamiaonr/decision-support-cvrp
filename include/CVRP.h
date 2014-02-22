@@ -191,6 +191,11 @@ class CVRP {
 
         bool Validate();
         long CalcRouteDist(CVRP::Route * rt);
+
+        static int GenerateRandomIndividual(
+                CVRP * & individual,
+                std::string dataset, 
+                int num_routes);
 };
 
 #endif  // CVRP_H_

@@ -516,7 +516,8 @@ void PrintCWSReport(const char * dataset, int total_cost, double cws_time) {
 
 void CWS::Run(
         CVRP * graph,
-        CWS::Version version) {
+        CWS::Version version,
+        bool matlab) {
 
     //graph->PrintStations();
 

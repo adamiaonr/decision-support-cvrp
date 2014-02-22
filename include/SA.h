@@ -29,6 +29,21 @@
 #include "CWS.h"
 #include "Matlab.h"
 
+/*! \def    SA_DEFAULT_COOLING_RATE
+    \brief  
+*/
+#define SA_DEFAULT_COOLING_RATE (double) 0.005
+
+/*! \def    SA_DEFAULT_TERMINATION_CRITERION
+    \brief  
+*/
+#define SA_DEFAULT_TERMINATION_CRITERION (uint32_t) 25000
+
+/*! \def    SA_DEFAULT_HALTING_CRITERION
+    \brief  
+*/
+#define SA_DEFAULT_HALTING_CRITERION (uint16_t) 300
+
 /*! \def    OSMAN_ICHANGE_MAX_LAMBDA
     \brief  
 */
@@ -85,7 +100,8 @@ class SA {
                 double T_i,
                 uint32_t L,
                 uint16_t stop_n,
-                SA::Phase start_phase);
+                SA::Phase start_phase,
+                bool matlab);
 };
 
 #endif  // SA_H_

@@ -1148,3 +1148,195 @@ CVRP::IChange CVRP::RandomOneInterchange() {
     return ichange;
 }
 
+int CVRP::GenerateRandomIndividual(
+        CVRP * & individual,
+        std::string dataset, 
+        int num_routes) {
+
+    individual = new CVRP(dataset);
+
+    std::vector <int> station_index_pool;
+    std::vector <int> route_index_pool;
+
+    int station_index_pool_size = individual->stations.size() - 1;
+
+    for (int i = 0; i < station_index_pool_size; i++) {
+
+        station_index_pool.push_back(i + 1);
+    }
+
+    int route_index_pool_size = num_routes;
+
+    for (int i = 0; i < route_index_pool_size; i++) {
+
+        route_index_pool.push_back(i);
+    }
+
+    // Pointers for current stations and routes when handled within cycles.
+    CVRP::Station * station = NULL;
+    CVRP::Route * route     = NULL;
+
+    // Even though the CVRP instance saves routes in a std::list, let's use 
+    // a vector for the building phase, since we'll need random access to each
+    // route.
+    std::vector <CVRP::Route *> routes;
+
+    for (int i = 0; i < num_routes; i++) {
+
+        // Create a new route to get stations into.
+        route = new CVRP::Route();
+
+        // Handle the initial attributes of the new route.
+        route->index        = i;
+        route->qty_supplied = 0;
+        route->capacity     = individual->capacity;
+        route->num_stations = 0;
+        route->distance     = 0;
+        route->active       = true;
+
+        // Initially set the start and end pointers of the routes to the depot.
+        route->start_station    = individual->depot;
+        route->end_station      = individual->depot;
+
+        // Add the route to the route vector.
+        routes.push_back(route);
+    }
+
+    long distance_change    = 0;
+    long total_distance     = 0;
+
+    int i = 0, j = 0, station_index = 0, route_index = 0;
+
+    // FIXME: I'm trusting that an eternal cycle in which a station can never 
+    // find a route to get in will never happen... Maybe I should not be so 
+    // optimistic.
+    while (station_index_pool_size > 0) {
+
+        i = rand() % station_index_pool_size;
+        station_index = station_index_pool[i];
+
+        station = individual->stations[station_index];
+
+        /*printf("GENERATE RANDOM: Picked %d, station[%d] with index %d.\n",
+                i,
+                station_index_pool[i],
+                individual->stations[station_index]->index - 1);*/
+
+        // Get a random route index.
+        j = rand() % route_index_pool_size;
+        route_index = route_index_pool[j];
+
+        /*printf("GENERATE RANDOM: Picked %d, route[%d] with index %d.\n",
+                j,
+                route_index_pool[j],
+                routes[route_index]->index);*/
+
+        // Keep looking for a suitable route index until the vehicle capacity 
+        // constraint is not violated.
+        while (routes[route_index]->qty_supplied + station->demand > individual->capacity) {
+
+            /*printf("GENERATE RANDOM: Route %d, route[%d] with index %d is full.\n",
+                    j,
+                    route_index_pool[j],
+                    routes[route_index]->index);*/
+
+            // Erase the unfeasible index from the route index pool, so that 
+            // one doesn't choose that again.
+            //route_index_pool.erase(route_index_pool.begin() + j);
+            route_index_pool.erase(
+                    remove(
+                            route_index_pool.begin(), 
+                            route_index_pool.end(), 
+                            route_index_pool[j]), 
+                    route_index_pool.end());
+            route_index_pool_size = route_index_pool.size();
+
+            if (!(route_index_pool_size > 0)) {
+
+                printf("GENERATE RANDOM: Individual violates route number "\
+                            "constraint. ABORTING.\n");
+
+                return -1;
+            }
+
+            j = rand() % route_index_pool_size;
+            route_index = route_index_pool[j];
+
+            /*printf("GENERATE RANDOM: Picked %d, route[%d] with index %d.\n",
+                    j,
+                    route_index_pool[j],
+                    routes[route_index]->index);*/
+        }
+
+        // Add the station to the route, and handle all necessary attributes of 
+        // Station and Route.
+        station->route = routes[route_index];
+
+        // If this is the first station to be added to a route, set it as the 
+        // start station.
+        if (routes[route_index]->start_station->type == CVRP::DEPOT) {
+
+            routes[route_index]->start_station = station;
+        }
+
+        station->next = individual->depot;
+        station->prev = routes[route_index]->end_station;
+
+        // Also, update the previous stations' next pointer.
+        if (station->prev->type != CVRP::DEPOT) {
+
+            station->prev->next = station;
+        }
+
+        // Update the quantitative route's attributes.
+        distance_change = 
+                - CVRP::Euc2DistCalc(routes[route_index]->end_station, individual->depot) +
+                + CVRP::Euc2DistCalc(routes[route_index]->end_station, station) 
+                + CVRP::Euc2DistCalc(station, station->next);
+
+        routes[route_index]->distance += distance_change;
+        routes[route_index]->qty_supplied += station->demand;
+        routes[route_index]->num_stations++;
+
+        // Finally update the route's end_station pointer.
+        routes[route_index]->end_station = station;
+
+        // Erase the index of the freshly added Station from the station index 
+        // pool, so that one doesn't choose that again.
+        //station_index_pool.erase(station_index_pool.begin() + i);
+        station_index_pool.erase(
+                remove(
+                        station_index_pool.begin(), 
+                        station_index_pool.end(), 
+                        station_index_pool[i]), 
+                station_index_pool.end());
+
+        station_index_pool_size = station_index_pool.size();
+
+        /*printf("NEW INDIVIDUAL'S INDEX POOL:\n\t|");
+
+        for (int s = 0; s < station_index_pool_size; s++) {
+
+            printf("[%3d]->[%3d]|", station_index_pool[s], individual->stations[station_index_pool[s]]->index - 1);
+        }
+
+        printf("\n");*/
+    }
+
+    // All stations have been attributed a route. Let's wrap everything up...
+
+    // Create the individual's CVRP route list.
+    for (int k = 0; k < num_routes; k++) {
+
+        individual->routes.push_back(routes[k]);
+        total_distance += routes[k]->distance;
+    }
+
+    // Update the few remaining attributes of individual.
+    individual->num_stations    = individual->stations.size();
+    individual->num_routes      = individual->routes.size();
+    individual->total_distance  = total_distance;
+
+    return 0;
+}
+

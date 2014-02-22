@@ -390,7 +390,8 @@ void SA::Run(
         double T_i,
         uint32_t L,
         uint16_t stop_n,
-        SA::Phase start_phase) {
+        SA::Phase start_phase,
+        bool matlab) {
 
     // Current solution S_c.
     CVRP * S_c = new CVRP();

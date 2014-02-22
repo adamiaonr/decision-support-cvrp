@@ -29,6 +29,21 @@
 #include "CVRP.h"
 #include "Matlab.h"
 
+/*! \def    GA_DEFAULT_GENERATIONS
+    \brief  
+*/
+#define GA_DEFAULT_GENERATIONS (uint32_t) 10000
+
+/*! \def    GA_DEFAULT_POPULATION_SIZE
+    \brief  
+*/
+#define GA_DEFAULT_POPULATION_SIZE (long) 120
+
+/*! \def    GA_DEFAULT_MUTATION_PROB
+    \brief  
+*/
+#define GA_DEFAULT_MUTATION_PROB (double) 0.5
+
 /*! \def    MAX_DRAWS
     \brief  
 */
@@ -42,12 +57,19 @@ class Evolutionary {
         ~Evolutionary();
 
         static void Run(
-                CVRP * cws_parallel,
-                CVRP * cws_sequential,
+                CVRP * cws,
                 CVRP * sa,
                 uint32_t max_generations,
                 long pop_size,
-                double mutation_prob);
+                double mutation_prob,
+                bool matlab);
+
+        static void Run(
+                std::string dataset,
+                uint32_t max_generations,
+                long pop_size,
+                double mutation_prob,
+                bool matlab);
 };
 
 #endif  // EVOLUTIONARY_H_
