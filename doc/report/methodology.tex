@@ -22,7 +22,7 @@ quantities used in the CVRP, the following are of particular importance:
 
 \begin{itemize}
 
-    \item \verb?Station?: Represents a demand point which should be visited by 
+    \item \verb?Station?: Represents a demand point $P$ which should be visited by 
             a vehicle. An instance of \verb?Station? has information about (1) the 
             demand point's index (as given in the dataset), (2) demand point's 
             $(x,y)$ coordinates, (3) the demand value of the point, (4) the 
@@ -39,9 +39,24 @@ quantities used in the CVRP, the following are of particular importance:
 
 The entities listed above are important for the solution representations used in 
 this problem. Since solutions in the CVRP are usually represented as sequences 
-of demand points closed by the depot (i.e. routes), in this case 
+of demand points closed by the depot (i.e. routes $R$), in this case 
 we treat a solution $S$ as set of linked lists of \verb?Station? instances:
-\[ depot \rightarrow station[i] \rightarrow station[k] \rightarrow station[l] \rightarrow ... \rightarrow depot \] 
+\[R_1: D \rightarrow P_1 \rightarrow P_{23} \rightarrow P_7 \rightarrow ... \rightarrow D \] 
+\[R_2: D \rightarrow P_3 \rightarrow P_{12} \rightarrow P_9 \rightarrow ... \rightarrow D \] 
+\[ ... \] 
+
+A graphical representation of a solution $S$ for a CVRP instance with 38 
+stations is given in Figure~\ref{fig:solution-example}
+
+\begin{figure}[h!]
+    \centering
+
+    \includegraphics[width=0.45\textwidth] {figures/A-n38-k5-s-ga.png}
+    \cprotect\caption{Graphical depiction of a solution $S$ for a CVRP instance 
+        with 38 stations.}
+    \label{fig:solution-example}
+
+\end{figure}
 
 Each 
 linked list is described by an associated \verb?Route? instance. A special 
@@ -58,18 +73,21 @@ The CVRP aims at minimizing the total distance traveled by the different
 vehicles when following their respective routes. Therefore, we use the total 
 distance between \verb+Station+ instances within a \verb+Route+, for all the 
 \verb+Route+ instances in a solution $S$, as the evaluation function 
-$e(S)$. Given a \verb+Route+ $r$, we sometimes use $e(r)$ for referring to 
-the distance traveled by a vehicle within that single route.\vertbreak
+$d(S)$. Given a \verb+Route+ $R$, we sometimes use $d(R)$ for referring to 
+the distance traveled by a vehicle within that single route. Also, as 
+previously used in Section~\ref{subsec:constructive}, we may use $d(D,P_i)$ to 
+represent the distance between two stations (in this case the depot $D$ and 
+a generic station $P_i$).
 
 \subsection{Clarke and Wright Savings (CWS) Algorithm}
 \label{subsec:overview}
 
 After the initial literature review phase, documented in
- Section~\ref{sec:intro}, the Clarke and Wright Savings (CWS) algortithm, as 
+ Section~\ref{sec:intro}, the Clarke and Wright Savings (CWS) algorithm, as 
 presented in Section 5.2.1 in~\cite{Toth2002}, was identified as an appropriate 
 heuristic for tackling CVRP. It presents itself as a clearly constructive 
 heuristic, due to its principle of building `complex' routes by merging more 
-simple routes --- initially in the form $(0, i, 0)$ --- via links $(i,j)$, 
+simple routes --- initially in the form $(D, P_i, D)$ --- via links $(P_i,P_j)$, 
 associated with a special quantity designated by `savings'.\vertbreak
 
 The CWS presents two versions, (1) a parallel version and (2) a sequential 
@@ -84,12 +102,12 @@ structures for representing a CVRP problem (described in
 Section~\ref{subsec:spec-enti}), the 
 CWS algorithm implementation defines the representation of a saving quantity, 
 \verb?Saving?, which contains information about (1) the indexes of demand 
-points $(i,j)$ (i.e. instances of \verb?Station?) to which the saving is 
-associated and (2) the actual saving value.\vertbreak
+points $(P_i,P_j)$ (i.e. instances of \verb?Station?) to which the saving is 
+associated and (2) the actual savings value.\vertbreak
 
 The description provided 
 in~\cite{Toth2002} suggests the calculation of every $s_{ij}$ for all 
-$i, j = 1, ..., n$, only imposing $i \neq j$ as a constraint. For $N$ nodes, 
+$P_i, P_j$ with $i,j = 1, ..., N$, only imposing $i \neq j$ as a constraint. For $N$ nodes, 
 this would result in a list of size $N(N - 1)$. This number can be further 
 reduced by realizing the following:
 
@@ -131,55 +149,55 @@ algorithm~\cite{Hoare:1961:AP:366622.366642}.
 \subsection{Versions of the CWS}
 \label{subsec:cws-p}
 
-As denoted in Section~\ref{subsec:savings}, the simplifications performed while 
-constructing the savings list have implications on the \verb?merge? routines, 
-for both versions, specifically the evaluation of the conditions shown 
-below:\vertbreak
+The simplifications performed while 
+constructing the savings list have implications on the \verb?merge()? routines, 
+for both versions of the CWS algorithm, specifically the evaluation of the 
+conditions shown below:\vertbreak
 
 \begin{algorithmic}[1]
-\If {($i + 1$ is depot) $\wedge$ ($j - 1$ is depot)}
+\If {($P_{i + 1}$ is $D$) $\wedge$ ($P_{j - 1}$ is $D$)}
 
-    \State Join route $r_k$ (containing $i$) and route $r_l$ (cont. $j$), via 
-    \Statex[2] the link $(i,j)$
+    \State Join route $R_k$ ($R_k \ni P_i$) and $R_l$ ($R_l \ni P_j$), via 
+    \Statex[2] link $(P_i,P_j)$
     
 
-\ElsIf {($i - 1$ is depot) $\wedge$ ($j + 1$ is depot)} 
-    \State Join route $r_k$ (containing $i$) and route $r_l$ (cont. $j$), via 
-    \Statex[2] the link $(j,i)$
+\ElsIf {($P_{i - 1}$ is $D$) $\wedge$ ($P_{j + 1}$ is $D$)} 
+    \State Join route $R_k$ ($R_k \ni P_i$) and $R_l$ ($R_l \ni P_j$), via 
+    \Statex[2] link $(P_j,P_i)$
 \Else 
-    \State At least one of $(i,j)$ is interior to a route $r_k$ or $r_l$. 
+    \State At least one of $(P_i,P_j)$ is interior to $R_k$ or $R_l$.
     \Statex[2] Abort.
 \EndIf
 \end{algorithmic}\vertbreak
 
 In short, the conditions shown above compensate the elimination of the symmetric 
-pairs of points $(i,j)$ and $(j,i)$, by evaluating a merge between two routes 
-via the link $(j,i)$ if trying it via the link $(i,j)$ does not work.\vertbreak
+pairs of points $(P_i,P_j)$ and $(P_j,P_i)$, by evaluating a merge between two routes 
+via the link $(P_j,P_i)$ if trying it via the link $(P_i,P_j)$ does not work.\vertbreak
 
 In addition to the conditions given above, the procedures taken upon the 
 establishment of a link between two previously unconnected routes is similar 
-among the two versions. Specifically, considering route $r_l$ is merged to route 
-$r_k$ (i.e. route $r_l$ ceases to exist) all \verb?Station? entities previously 
-part of a route $r_l$ are updated to belong to route $r_k$, the pointers of the 
+among the two versions. Specifically, considering route $R_l$ is merged to route 
+$R_k$ (i.e. route $R_l$ ceases to exist) all \verb?Station? entities previously 
+part of a route $R_l$ are updated to belong to route $R_k$, the pointers of the 
 linking \verb?Station? entities are updated (as these no longer point to the 
-depot) and the information held by the \verb?Route? entity of route $r_l$ is 
-appropriately merged with that of route $r_k$.\vertbreak
+depot) and the information held by the \verb?Route? entity of route $R_l$ is 
+appropriately merged with that of route $R_k$.\vertbreak
 
 The parallel and sequential version of the CWS algorithm mostly differ in the 
 way the various route merging operations are applied, not on the nature of 
-the single merge operation. For the parallel version, the algorithm cycles 
+the single \verb+merge()+ operation. For the parallel version, the algorithm cycles 
 through the savings list once, performing merges between several routes 
 along the way, i.e. it does not `stick' to merging other routes to a particular 
-route, given a pair of points $(i,j)$ it attempts to merge any two routes that 
-include the edges $i$ and $j$.\vertbreak
+route, given a pair of points $(P_i,P_j)$ it attempts to merge any two routes that 
+include the edges $P_i$ and $P_j$.\vertbreak
 
-For the sequential version, the algorithm `sticks' to a route $r_k$, cycles 
-through the savings list and evaluates if a link $(i,j)$ is suitable for 
-merging a route $r_l$ with $r_k$ (i.e. only links $(i,j)$ in which either $i$ 
-or $j$ are in the edges of $r_k$ are considered suitable). If that is the case, 
-that link $(i,j)$ is discarded from the list, and the algorithm returns to the 
+For the sequential version, the algorithm `sticks' to a route $R_k$, cycles 
+through the savings list and evaluates if a link $(P_i,P_j)$ is suitable for 
+merging a route $R_l$ with $R_k$ (i.e. only links $(P_i,P_j)$ in which either $P_i$ 
+or $P_j$ are in the edges of $R_k$ are considered suitable). If that is the case, 
+that link $(P_i,P_j)$ is discarded from the list, and the algorithm returns to the 
 top of the savings list, since the new merging operation may have enabled a 
-previous pair $(i,j)$. This is repeated until the algorithm reaches the end of 
+previous pair $(P_w,P_z)$. This is repeated until the algorithm reaches the end of 
 the savings list. In its turn, the whole procedure is repeated for each 
 remaining route in the algorithm's route list\cprotect\footnote{In our case, 
 the process 
@@ -189,34 +207,35 @@ entity is active.}.
 \subsection{Constraints in CWS Route Mergings}
 \label{subsec:const}
 
-Whenever a merge operation between two routes $r_i$ and $r_j$ is attempted --- in 
+Whenever a merge operation between two routes $R_i$ and $R_j$ is attempted --- in 
 both the parallel and sequential cases --- the implemented version of the CWS 
-algorithm takes the following evaluations into account (let $c(r)$ represent 
-the quantity of goods delivered within a route $r$):
+algorithm takes the following evaluations into account (let $c(R)$ represent 
+the quantity of goods delivered within a route $R$):
 
 \begin{itemize}
 
     \item Total amount of goods supplied by the two routes must be less than 
-            a vehicle's capacity $C$, i.e. $c(r_i) + c(r_j) \le C$. If 
+            a vehicle's capacity $C$, i.e. $c(R_i) + c(R_j) \le C$. If 
             such a condition is not verified, the merge operations is not allowed.
-    \item Demand points on a link $(i,j)$, associated with a saving quantity $s_{ij}$ 
+    \item Demand points on a link $(P_i,P_j)$, associated with a saving quantity $s_{ij}$ 
             under consideration for a route merge, must not be interior to 
             a route.
-    \item Demand points on a link $(i,j)$, associated with a saving quantity $s_{ij}$ 
+    \item Demand points on a link $(P_i,P_j)$, associated with a saving quantity $s_{ij}$ 
             under consideration for a route merge, must not belong to the same 
             route.
 
 \end{itemize}
 
 If the previously listed conditions are met, the merge operation is allowed to 
-go ahead, the \verb?Station? $(i,j)$ instances, at the appropriate edges of each 
-route $r_i$ and $r_j$, are linked in order to form a new route. The value of the 
-new route, $e(r_n)$ is calculated according to 
-$e(r_n) = e(r_i) + e(r_j) - s_{ij}$.\vertbreak
+go ahead, the \verb?Station? $(P_i,P_j)$ instances, at the appropriate edges of each 
+route $R_i$ and $R_j$, are linked in order to form a new route. The value of the 
+new route, $d(R_n)$ is calculated according to 
+$d(R_n) = d(R_i) + d(R_j) - s_{ij}$.\vertbreak
 
 Although no constraints related to the number 
-of routes are imposed in the \verb?merge? functions, the CWS algorithm always 
-determines the optimal number of routes for the sequential version, while it 
+of routes $V$ are imposed in the \verb?merge()? functions, the CWS algorithm always 
+determines the optimal number of routes\footnote{By `optimal' one refers to the 
+best value given by each test instance.} for the sequential version, while it 
 sometimes reports a sub-optimal number for the parallel 
 version, as verified in the results given in Section~\ref{sec:results}.
 
@@ -325,22 +344,22 @@ I. Osman~\cite{Osman1993,Thangiahl1996,Toth2002}. Regarding the work presented
 here, the 
 adoption of such heuristic represents an evolution compared to the 
 simpler 2-opt local search heuristic described in Section~\ref{subsec:2-opt}: 
-now, instead of restricting the interchanges between two stations $s_i$ and 
-$s_j$ to a single route $r$, a neighbor $S_n$ of a solution $S$ is 
+now, instead of restricting the interchanges between two stations $P_i$ and 
+$P_j$ to a single route $R$, a neighbor $S_n$ of a solution $S$ is 
 generated by inserting\slash exchanging one station into\slash between 
-different routes $r_i$ and $r_j$. Such 1-interchange mechanism includes two 
+different routes $R_i$ and $R_j$. Such 1-interchange mechanism includes two 
 different operations:
 
 \begin{itemize}
 
-    \item \textbf{(0,1) or (1,0):} Extracting a station $s_i$ from a route 
-        $r_i$ and inserting it in a route $r_j$.
-    \item \textbf{(1,1):} Swapping stations $s_i$ and $s_j$ between their 
-        initial routes $r_i$ and $r_j$.
+    \item \textbf{(0,1) or (1,0):} Extracting a station $P_i$ from a route 
+        $R_i$ and inserting it in a route $R_j$.
+    \item \textbf{(1,1):} Swapping stations $P_i$ and $P_j$ between their 
+        initial routes $R_i$ and $R_j$.
 
 \end{itemize}\vertbreak
 
-In order to remove crossings of links in the routes $r_i$ and $r_j$ --- which 
+In order to remove crossings of links in the routes $R_i$ and $R_j$ --- which 
 may happen due to the re-configuration caused by the 1-interchange 
 procedure --- the same 2-opt local search method described in 
 Section~\ref{subsec:2-opt} is applied to both routes at the end of the `core' 
@@ -355,33 +374,33 @@ condition and (4) halting criterion. We follow a method for determining $T_s$
 which is similar to that used in the hybrid Tabu Search - Simulated 
 Annealing algorithm proposed by I. Osman in~\cite{Osman1993}.\vertbreak
 
-We define the acceptance probability of a new solution $S_n$ (derived from a 
+We define the acceptance probability $A$ of a new solution $S_n$ (derived from a 
 current solution 
 $S_c$ via a 1-interchange procedure) as (see line 16 of the algorithm defined 
 in Section~\ref{subsec:metaheuristics}):
 
 \begin{equation*}
-    P(S_n) = \left\{ 
+    A(S_n) = \left\{ 
         \begin{array}{rl}
-            e^\frac{-(e(S_n) - e(S_c))}{T_c} &\mbox{ \text{if $e(S_n) \geq e(S_c)$}} \\
-            1 &\mbox{ \text{if $e(S_n) < e(S_c)$}}
+            e^\frac{-(d(S_n) - d(S_c))}{T_c} &\mbox{ \text{if $d(S_n) \geq d(S_c)$}} \\
+            1 &\mbox{ \text{if $d(S_n) < d(S_c)$}}
         \end{array} \right.
     \label{eq:sa-accept}
 \end{equation*}
 
-where $e(.)$ is the evaluation function and $T_c$ is the current temperature. 
+where $d(.)$ is the evaluation function and $T_c$ is the current temperature. 
 Considering an initial solution $S_i$, we determine the initial temperature 
-$T_s$ by calculating $T$ for which $P(\text{min}(\Delta_e)) = 0.5$, 
-where $\Delta_e = e(S_n) - e(S_i)$.\vertbreak
+$T_s$ by calculating $T$ for which $A(\text{min}(\Delta_d)) = 0.5$, 
+where $\Delta_d = d(S_n) - d(S_i)$.\vertbreak
 
 Given an initial solution $S_i$, its entire neighborhood obtained via a 
 1-interchange local search heuristic is analyzed and the changes in the 
-evaluation function $\Delta_e$ 
+evaluation function $\Delta_d$ 
 are recorded for each feasible interchange\footnote{I.e. all changes that 
 result in routes not exceeding the vehicle capacity constraint.}. We then 
 apply the following expression to determine $T_s$:
 
-\[T_s = \frac{\text{min}(\Delta_{e})}{\text{ln}(0.5)}\]
+\[T_s = \frac{\text{min}(\Delta_{d})}{\text{ln}(0.5)}\]
 
 \subsection{Genetic Algorithm (GA)}
 \label{subsec:ga}
@@ -404,15 +423,15 @@ parameters must be given to our GA implementation:
     \item Solutions provided by the CWS (both parallel and sequential) and SA 
             algorithms.
     \item Number of generations to produce $G$.
-    \item Population size $N$.
+    \item Population size $|W|$.
     \item Mutation probability for the crossover process $M \in [0.0, 1.0]$
 \end{itemize}\vertbreak
 
 In our case, we include the solutions provided 
 by the parallel and sequential versions of the CWS algorithm, along with that 
-provided via SA, in the initial population $P(t_0)$. The remaining $N - 3$ 
-elements of the initial population $P(t_0)$ are randomly generated, taking into 
-account the capacity $C$ and route number $R$ constraints implicit in the CWS and 
+provided via SA, in the initial population $W(t_0)$. The remaining $|W| - 3$ 
+elements of the initial population $W(t_0)$ are randomly generated, taking into 
+account the capacity $C$ and route number $V$ constraints implicit in the CWS and 
 SA solutions.
 
 \subsection{Random Tournament Selection}
@@ -421,34 +440,34 @@ SA solutions.
 The population selection strategy used in our GA instance (step 6 on the listing 
 shown in Section~\ref{subsubsec:gen-al}) is based on simple 
 Random Tournament Selection, with a sample size of two, i.e. one pair of 
-solutions $(S_1,S_2)$ is picked at random from $P(t - 1)$ and one chooses that 
-$S_n$ with lowest evaluation function value $e(S_n)$. In addition, our strategy 
-automatically elects the best 10\% of $P(t - 1)$ to $P'(t)$, the set of `fittest' 
-solutions (those with lower values of $e(.)$), which are excused from 
+solutions $(S_i,S_j)$ is picked at random from $W(t - 1)$ and one chooses that 
+$S$ with lowest evaluation function value $d(S)$. In addition, our strategy 
+automatically elects the best 10\% of $W(t - 1)$ to $W'(t)$, the set of `fittest' 
+solutions (those with lower values of $d(.)$), which are excused from 
 participating in the tournament.\vertbreak 
 
-The process is summarized in pseudo-code in the following listing ($N$ is the 
+The process is summarized in pseudo-code in the following listing ($|W|$ is the 
 population size, given as argument to the algorithm):\vertbreak
 
 \begin{algorithmic}[1]
 
-\State sort $P(t - 1)$
-\State add top 10\% of $P(t - 1)$ to $P'(t)$, 
-\Statex[1] exclude them from $P(t - 1)$
+\State sort $W(t - 1)$
+\State add top 10\% of $W(t - 1)$ to $W'(t)$, 
+\Statex[1] exclude them from $W(t - 1)$
 
-\While{size of $P'(t) < \frac{N}{2}$}
+\While{size of $W'(t) < \frac{|W|}{2}$}
 
     \Repeat
-        \State select random pair $(S_1,S_2)$ from $P(t - 1)$
+        \State select random pair $(S_1,S_2)$ from $W(t - 1)$
     \Until{$S_1 != S_2$}
 
-    \If {$e(S_1) \le e(S_2)$}
+    \If {$d(S_1) \le d(S_2)$}
 
-        \State add $S_1$ to $P'(t)$, exclude it from $P(t - 1)$
+        \State add $S_1$ to $W'(t)$, exclude it from $W(t - 1)$
 
-    \ElsIf {$e(S_1) > e(S_2)$}
+    \ElsIf {$d(S_1) > d(S_2)$}
 
-        \State add $S_2$ to $P'(t)$, exclude it from $P(t - 1)$
+        \State add $S_2$ to $W'(t)$, exclude it from $W(t - 1)$
 
     \EndIf
 
@@ -482,35 +501,35 @@ In addition, we apply a PMX-based crossover operation similar to the Best
 Route Better Adjustment (BRBAX) recombination mechanism presented 
 in~\cite{Bermudez2010}. The following listing summarizes the offspring 
 generation procedure (which includes the BRBAX-based crossover operation) in 
-pseudo-code (let $C$ be the capacity constraint of the CVRP under consideration; 
-$Q_r$ be the quantity of goods supplied in a route $r$; $R$ the number of 
-routes of the solutions contained in the set $P'(t)$; $D$ represents the depot):\vertbreak
+pseudo-code (let $Q_R$ be the quantity of goods supplied in a route $R$; $V$ the number of 
+routes of the solutions contained in the set $W'(t)$; the remaining symbols 
+follow the conventions applied in the paper so far):\vertbreak
 
 \begin{algorithmic}[1]
 
-\While{size of $O(t) < \frac{N}{2}$}
+\While{size of $O(t) < \frac{|W|}{2}$}
 
     \Repeat
-        \State select random pair $(P_1,P_2)$ from $P'(t)$
-    \Until{$P_1 != P_2$}
+        \State select random pair $(S_1,S_2)$ from $W'(t)$
+    \Until{$S_1 != S_2$}
 
     \State initialize `offspring' solution $S_o$
 
-    \State sort routes of $P_1$ according to $C - Q_r$, 
+    \State sort routes of $S_1$ according to $C - Q_R$, 
     \Statex[2] in ascending order
-    \State add best $\frac{R}{2}$ routes of $P_1$ to $S_o$
+    \State add best $\frac{V}{2}$ routes of $S_1$ to $S_o$
 
-    \ForAll{routes $r$ in $P_2$} 
-        \ForAll{stations $s$ in route $r_i$} 
-            \If {$s_i$ not in $S_o$}
-                \State add $s_i$ to $S_o$, in order, 
-                \Statex[5] with $D$ delimiting routes of $P_2$
+    \ForAll{routes $R$ in $S_2$} 
+        \ForAll{stations $P$ in route $R_i$} 
+            \If {$P_i$ not in $S_o$}
+                \State add $P_i$ to $S_o$, in order, 
+                \Statex[5] with $D$ delimiting routes of $S_2$
             \EndIf
         \EndFor
     \EndFor
 
-    \If {number of routes in $S_o > R$}
-        \State condense $S_o$ into $R$ routes
+    \If {number of routes in $S_o > V$}
+        \State condense $S_o$ into $V$ routes
     \EndIf
 
     \If {CVRP constraints are met by $S_o$}
