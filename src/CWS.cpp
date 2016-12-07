@@ -503,13 +503,13 @@ void PrintCWSReport(const char * dataset, int total_cost, double cws_time) {
             dataset, total_cost, cws_time);
 
     printf("\n\n");
-    for (int i = 0; i < (strlen(report) - 1); i++)
+    for (unsigned int i = 0; i < (strlen(report) - 1); i++)
         printf("-");
     printf("\n");
 
     printf("%s", report);
 
-    for (int i = 0; i < (strlen(report) - 1); i++)
+    for (unsigned int i = 0; i < (strlen(report) - 1); i++)
         printf("-");
     printf("\n\n");
 }

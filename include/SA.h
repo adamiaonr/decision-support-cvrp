@@ -52,7 +52,7 @@
 /*! \def    UINT32_MAX
     \brief  
 */
-#define UINT32_MAX (0xFFFFFFFF)
+// #define UINT32_MAX (0xFFFFFFFF)
 
 /*! \def    MAX_SA_POINT
     \brief  

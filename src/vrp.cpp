@@ -14,7 +14,7 @@ ArgvParser * CreateArgvParser() {
     /*cmds->setIntroductoryDescription("Clarke Wright Savings (CWS) algorithm "\
             "implementation for the CVRP by adamiaonr@gmail.com");*/
     cmds->setIntroductoryDescription("Custom implementation of heuristics and "\
-            "meta-heuristics for the Capacitated Vehicle Routing Problem "\ 
+            "meta-heuristics for the Capacitated Vehicle Routing Problem "\
             "(CVRP): e.g. Clarke & Wright Savings algorithm (CWS), Simulated "\
             "Annealing (SA) and Genetic Algorithms (GAs).\nImplementation by "\
             "adamiaonr@gmail.com");

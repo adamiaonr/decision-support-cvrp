@@ -45,13 +45,13 @@ void PrintEvolutionaryReport(
             ga_time);
 
     printf("\n\n");
-    for (int i = 0; i < (strlen(report) - 1); i++)
+    for (unsigned int i = 0; i < (strlen(report) - 1); i++)
         printf("-");
     printf("\n");
 
     printf("%s", report);
 
-    for (int i = 0; i < (strlen(report) - 1); i++)
+    for (unsigned int i = 0; i < (strlen(report) - 1); i++)
         printf("-");
     printf("\n\n");
 }
@@ -70,7 +70,7 @@ void RandomTournamentSelection(
         std::vector <CVRP *> & fittest) {
 
     long contestants_size = contestants.size();
-    long pop_size = contestants_size;
+    unsigned long pop_size = contestants_size;
 
     // 1) Sort the contestants by evaluation function value, in ascending 
     // order, i.e. smallest values first.
@@ -86,7 +86,7 @@ void RandomTournamentSelection(
 
     // 2) Select the first, more valuable, pop_size / 10 contestants and make 
     // them automatically eligible to the next generation.
-    for (int m = 0; m < (pop_size / 10); m++) {
+    for (unsigned int m = 0; m < (pop_size / 10); m++) {
 
         // 2.1) Send it to Noah's Ark...
         fittest.push_back(contestants[m]);
